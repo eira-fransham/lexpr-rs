@@ -5,6 +5,13 @@ use serde::ser;
 use crate::error::{Error, Result};
 use crate::Value;
 
+/// A type implementing [`serde::ser::Serializer`], allowing serialization to [`Value`].
+///
+/// In most cases, you will want to use the [`to_value`] free function,
+/// which directly serializes an instance of a type implementing
+/// [`serde::ser::Serialize`] to a [`Value`]. Only use this if you need to
+/// directly access the [`serde::ser::Serializer`] visitor methods, e.g. when
+/// writing a serializer which wraps this.
 pub struct Serializer;
 
 impl ser::Serializer for Serializer {

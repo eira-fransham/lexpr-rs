@@ -149,7 +149,7 @@
 
 mod de;
 mod ser;
-mod value;
+pub mod value;
 
 pub mod error;
 pub use de::{

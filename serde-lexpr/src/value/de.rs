@@ -1,3 +1,5 @@
+//! Internal deserialization code
+
 use std::marker::PhantomData;
 
 use serde::de::{self, Error as SerdeError, Visitor};
@@ -8,11 +10,26 @@ use lexpr::{number, Cons, Number};
 use crate::error::{Error, Result};
 use crate::Value;
 
+/// A type implementing [`serde::de::Deserializer`] for [`Value`].
+///
+/// In most cases, you will want to use the [`from_value`] free function,
+/// which directly creates an instance of a type implementing
+/// [`serde::de::Deserialize`]. Only use this if you need to directly access
+/// the [`serde::de::Deserializer`] visitor methods, e.g. when writing a
+/// deserializer which wraps this.
+#[derive(Copy, Clone, Debug)]
 pub struct Deserializer<'de> {
     input: &'de Value,
 }
 
 impl<'de> Deserializer<'de> {
+    /// Create a stateful [`Deserializer`] from a [`Value`].
+    ///
+    /// In most cases, you will want to use the [`from_value`] free function,
+    /// which directly creates an instance of a type implementing
+    /// [`serde::de::Deserialize`]. Only use this if you need to directly access
+    /// the [`serde::de::Deserializer`] visitor methods, e.g. when writing a
+    /// deserializer which wraps this.
     pub fn from_value(input: &'de Value) -> Self {
         Deserializer { input }
     }
