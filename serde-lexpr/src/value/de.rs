@@ -11,6 +11,7 @@ use crate::error::{Error, Result};
 use crate::Value;
 
 /// lexpr deserializer
+#[derive(Copy, Clone, Debug)]
 pub struct Deserializer<'de> {
     input: &'de Value,
 }
