@@ -1,3 +1,5 @@
+use std::fmt;
+
 use crate::value::Value;
 
 use proc_macro2::{Delimiter, Literal, Spacing, TokenStream, TokenTree};
@@ -15,6 +17,28 @@ pub enum ParseError {
     UnexpectedChar(char),
     UnexpectedDelimiter(Delimiter),
     UnexpectedEnd,
+}
+
+impl fmt::Display for ParseError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::ExpectedStringLiteral(literal) => {
+                write!(f, "expected string literal `{}`", literal)
+            }
+            Self::UnexpectedToken(tt) => write!(f, "unexpected token `{}`", tt),
+            Self::UnexpectedChar(c) => write!(f, "unexpected character `{}`", c),
+            Self::UnexpectedDelimiter(delim) => {
+                let delim = match delim {
+                    Delimiter::Brace => "brace",
+                    Delimiter::Bracket => "bracket",
+                    Delimiter::Parenthesis => "parenthesis",
+                    Delimiter::None => "non",
+                };
+                write!(f, "unexpected {}-delimited expression", delim)
+            }
+            Self::UnexpectedEnd => write!(f, "unexpected end of input"),
+        }
+    }
 }
 
 impl Parser {
@@ -63,6 +87,19 @@ impl Parser {
                                     let lit = lit.clone();
                                     self.eat_token();
                                     Ok(Value::Negated(lit))
+                                }
+                                _ => Ok(Value::Symbol(c.to_string())),
+                            },
+                            ':' => match self.peek() {
+                                Some(TokenTree::Literal(lit)) => {
+                                    let name = string_literal(lit)?;
+                                    self.eat_token();
+                                    Ok(Value::Keyword(name))
+                                }
+                                Some(TokenTree::Ident(ident)) => {
+                                    let name = ident.to_string();
+                                    self.eat_token();
+                                    Ok(Value::Keyword(name))
                                 }
                                 _ => Ok(Value::Symbol(c.to_string())),
                             },

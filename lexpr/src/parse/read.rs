@@ -1,5 +1,5 @@
 use std::ops::Deref;
-use std::{char, cmp, io, str, u32};
+use std::{char, cmp, io, str};
 
 use super::error::{Error, ErrorCode, Result};
 use super::iter::LineColIterator;
@@ -369,13 +369,13 @@ impl<'a> SliceRead<'a> {
         position
     }
 
-    fn parse_symbol_bytes<'s, T: ?Sized, F>(
+    fn parse_symbol_bytes<'s, T, F>(
         &'s mut self,
         scratch: &'s mut Vec<u8>,
         result: F,
     ) -> Result<Reference<'a, 's, T>>
     where
-        T: 's,
+        T: ?Sized + 's,
         F: for<'f> FnOnce(&'s Self, &'f [u8]) -> Result<&'f T>,
     {
         // Index of the first byte not yet copied into the scratch space.
@@ -486,13 +486,13 @@ impl<'a> SliceRead<'a> {
     /// The big optimization here over IoRead is that if the string contains no
     /// backslash escape sequences, the returned &str is a slice of the raw
     /// S-expression data so we avoid copying into the scratch space.
-    fn parse_r6rs_str_bytes<'s, T: ?Sized, F>(
+    fn parse_r6rs_str_bytes<'s, T, F>(
         &'s mut self,
         scratch: &'s mut Vec<u8>,
         result: F,
     ) -> Result<Reference<'a, 's, T>>
     where
-        T: 's,
+        T: ?Sized + 's,
         F: for<'f> FnOnce(&'s Self, &'f [u8]) -> Result<&'f T>,
     {
         // Index of the first byte not yet copied into the scratch space.
@@ -1185,7 +1185,7 @@ static DELIMITER: [u8; 12] = [
 
 /// Decode a UTF8 multibyte sequence starting with `initial` and return the
 /// decoded codepoint.
-fn decode_utf8_sequence<'de, R: Read<'de> + ?Sized>(
+pub(crate) fn decode_utf8_sequence<'de, R: Read<'de> + ?Sized>(
     read: &mut R,
     scratch: &mut Vec<u8>,
     initial: u8,

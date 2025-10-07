@@ -4,12 +4,30 @@ New features:
 
 - New parser option `racket_hash_percent_symbols`, implemented in PR
   #90 by @andrew-pa.
+- New parser option `leading_digit_symbols` (PR #106). This should now
+  allow parsing files produced by recent KiCad versions, thus closing
+  #64.
+- Accept symbols starting with an alphabetical unicode codepoint,
+  fixing #112.
+
+Fixes:
+
+- The `Cons` type now has a custom `Drop` implementation which avoids
+  recursion on the "cdr" field. This allows for dropping long lists
+  without overflowing the stack (#104).
 
 Changes:
 
 - The `sexp!` macro is now only included when specifying the
   non-default feature `sexp-macro`. This makes the crate a bit more
   lightweight for users who don't need that macro.
+- The `sexp!` macro now recognizes keywords without a leading
+  octothorpe, as in Emacs Lisp and Common Lisp, allowing for a
+  less-noisy spelling; e.g.: `:foo` instead of `#:foo`. Feature
+  request (#99) and initial implementation (#96) by @samuel-jimenez.
+- The `parser::Options::elisp` constructor now enables the
+  `leading_digit_symbols` option, as that's what's appropriate for
+  Emacs Lisp.
 
 Maintenance-related changes:
 
